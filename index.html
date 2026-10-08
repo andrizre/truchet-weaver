@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truchet Weaver</title>
+<style>
+  :root { --bg: #0e0e12; --panel: #16161d; --fg: #e8e8f0; --accent: #f97316; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: 'Segoe UI', system-ui, sans-serif; display: flex; height: 100vh; }
+  #panel {
+    width: 280px; background: var(--panel); padding: 20px; overflow-y: auto;
+    border-right: 1px solid #26262e; flex-shrink: 0;
+  }
+  h1 { font-size: 18px; margin-bottom: 4px; color: var(--accent); }
+  .sub { font-size: 11px; color: #888; margin-bottom: 18px; }
+  .ctl { margin-bottom: 14px; }
+  label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #9a9ab0; margin-bottom: 5px; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .val { float: right; color: var(--accent); font-weight: 600; font-size: 12px; }
+  select, button { width: 100%; padding: 8px; background: #22222c; color: var(--fg); border: 1px solid #33333f; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  button:hover { background: #2c2c3a; border-color: var(--accent); }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  #stage { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+  canvas { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 0 40px rgba(0,0,0,.6); cursor: crosshair; }
+  .hint { font-size: 10px; color: #666; margin-top: 16px; line-height: 1.5; }
+  .sec { border-top: 1px solid #26262e; padding-top: 14px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>Truchet Weaver</h1>
+  <div class="sub">Generative maze-patterns from quarter-circle tiles</div>
+
+  <div class="ctl"><label>Grid Size <span class="val" id="vGrid">24</span></label>
+    <input type="range" id="grid" min="4" max="60" value="24"></div>
+  <div class="ctl"><label>Stroke Width <span class="val" id="vStroke">6</span></label>
+    <input type="range" id="stroke" min="1" max="40" value="6"></div>
+  <div class="ctl"><label>Hue <span class="val" id="vHue">180</span></label>
+    <input type="range" id="hue" min="0" max="360" value="180"></div>
+  <div class="ctl"><label>Hue Spread <span class="val" id="vSpread">120</span></label>
+    <input type="range" id="spread" min="0" max="360" value="120"></div>
+  <div class="ctl"><label>Tile Style</label>
+    <select id="style">
+      <option value="arcs">Quarter arcs</option>
+      <option value="semis">Semicircles</option>
+      <option value="lines">Diagonals</option>
+      <option value="mixed">Mixed</option>
+    </select></div>
+  <div class="ctl"><label>Background</label>
+    <select id="bg">
+      <option value="#0e0e12">Dark</option>
+      <option value="#f4f0e8">Paper</option>
+      <option value="#101820">Navy</option>
+    </select></div>
+
+  <div class="sec">
+    <div class="row">
+      <button id="regen">↻ Reseed</button>
+      <button id="anim">▶ Animate</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="png">⬇ Save PNG</button>
+    </div>
+  </div>
+
+  <div class="hint">
+    Arcs form continuous strands — each tile's connections stay consistent,
+    so paths never dead-end mid-tile. Reseed to shuffle, animate to watch it
+    weave itself.
+  </div>
+</div>
+<div id="stage"><canvas id="c"></canvas></div>
+
+<script src="main.js"></script>
+</body>
+</html>

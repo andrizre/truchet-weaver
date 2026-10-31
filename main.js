@@ -133,6 +133,38 @@ function startAnim() {
   })(t0);
 }
 
+// --- SVG export (vector) ---
+function buildSVG() {
+  const px = 1000, cell = px / params.grid;
+  const hsl2 = (h) => `hsl(${((h % 360) + 360) % 360},78%,60%)`;
+  let out = '';
+  for (const t of tiles) {
+    const hue = params.hue + ((t.x / params.grid + t.y / params.grid) / 2) * params.spread;
+    const col = hsl2(hue);
+    const w = Math.max(1, (params.stroke / 24) * cell);
+    const f = (n) => (n * cell).toFixed(3);
+    const X = t.x * cell, Y = t.y * cell;
+    const d = [];
+    if (t.style === 'lines') {
+      d.push(t.flip ? `M ${f(0)} ${f(0)} L ${f(1)} ${f(1)}` : `M ${f(1)} ${f(0)} L ${f(0)} ${f(1)}`);
+    } else if (t.style === 'semis') {
+      // Semicircle through tile midpoints: arc centered on edge midpoint
+      if (t.flip) d.push(`M ${f(0)} ${f(0.5)} A ${f(0.5)} ${f(0.5)} 0 0 1 ${f(1)} ${f(0.5)}`);
+      else d.push(`M ${f(0)} ${f(0.5)} A ${f(0.5)} ${f(0.5)} 0 0 0 ${f(1)} ${f(0.5)}`);
+    } else { // arcs
+      if (t.flip) {
+        d.push(`M ${f(0.5)} ${f(0)} A ${f(0.5)} ${f(0.5)} 0 0 1 ${f(0)} ${f(0.5)}`);
+        d.push(`M ${f(1)} ${f(0.5)} A ${f(0.5)} ${f(0.5)} 0 0 1 ${f(0.5)} ${f(1)}`);
+      } else {
+        d.push(`M ${f(0.5)} ${f(0)} A ${f(0.5)} ${f(0.5)} 0 0 0 ${f(1)} ${f(0.5)}`);
+        d.push(`M ${f(0)} ${f(0.5)} A ${f(0.5)} ${f(0.5)} 0 0 0 ${f(0.5)} ${f(1)}`);
+      }
+    }
+    out += `<g transform="translate(${X.toFixed(2)},${Y.toFixed(2)})" fill="none" stroke="${col}" stroke-width="${w.toFixed(3)}" stroke-linecap="round">${d.map(p => `<path d="${p}"/>`).join('')}</g>\n`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 ${px} ${px}"><rect width="${px}" height="${px}" fill="${params.bg}"/>\n${out}</svg>`;
+}
+
 // --- Controls wiring ---
 const bind = (id, key, fmt = parseFloat) => {
   const el = document.getElementById(id);
@@ -156,6 +188,14 @@ document.getElementById('png').addEventListener('click', () => {
   a.download = 'truchet-weaver.png';
   a.href = canvas.toDataURL('image/png');
   a.click();
+});
+document.getElementById('svg').addEventListener('click', () => {
+  const blob = new Blob([buildSVG()], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.download = 'truchet-weaver.svg';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
 
 // Click canvas to reseed
